@@ -9,7 +9,7 @@ const App = () => {
   return (
     <div>
       <Navbar />
-      <div className='flex mobileView'>
+      <div className='flex mobileView overflow-x-hidden'>
 
       <LeftSidebar />
       <MiddleContainer />

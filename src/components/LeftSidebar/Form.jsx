@@ -1,79 +1,95 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from "react";
 import { CiCirclePlus } from "react-icons/ci";
+import { FormContext } from "../../context/FormContext";
 
 const Form = () => {
-    const [uploadImg, setUploadImage] = useState(null); // Track the uploaded image
-    const [profession, setProfession] = useState('');
-    const [skill, setSkill] = useState('');
-    const [offered, setOffered] = useState(null); // Track the uploaded offered service image
-    const [experience, setExperience] = useState('');
-    const [location, setLocation] = useState('');
+    const { formData, setFormData } = useContext(FormContext);
+    const [currentSkill, setCurrentSkill] = useState("");
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleImageUpload = (e, fieldName) => {
+        const file = e.target.files[0];
+        setFormData({ ...formData, [fieldName]: file });
+    };
+
+    const handleSkillChange = (e) => {
+        const value = e.target.value;
+        if (value.includes(",")) {
+            const skills = value
+                .split(",")
+                .map((skill) => skill.trim())
+                .filter((skill) => skill);
+            setFormData({
+                ...formData,
+                skill: [...formData.skill, ...skills],
+            });
+            setCurrentSkill("");
+        } else {
+            setCurrentSkill(value);
+        }
+    };
+
+    const handleSkillBlur = () => {
+        if (currentSkill.trim()) {
+            setFormData({
+                ...formData,
+                skill: [...formData.skill, currentSkill.trim()],
+            });
+            setCurrentSkill("");
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-       
-        const formData = {
-            profession,
-            skill,
-            experience,
-            location,
-            uploadImg,
-            offered,
-        };
-        console.log(formData);
-    };
-
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        setUploadImage(file); 
-    };
-
-    const handleOfferedImageUpload = (e) => {
-        const file = e.target.files[0];
-        setOffered(file); 
+        console.log("Form Data Submitted:", formData);
     };
 
     return (
         <div>
-            <div className='w-[340px] h-[90px] rounded-[10px] border-[2px] border-black m-2 left-form'>
-                <form onSubmit={handleSubmit} className='flex items-center gap-10 justify-around'>
-                    <div className='mt-5'>
-                        <label htmlFor="Profile">Profile Picture</label>
-                        <p>(Required*)</p>
-                    </div>
-                    <div className='w-[50%] h-[75px] flex flex-col items-center border-[2px] border-dashed border-black mt-1 rounded-[10px]'>
-                        {/* Hidden file input */}
-                        <input
-                            type="file"
-                            id="fileUpload"
-                            className="hidden"
-                            accept="image/*"
-                            onChange={handleImageUpload} // Capture the uploaded image
-                        />
-                        {/* Label for file input */}
-                        <label htmlFor="fileUpload" className="flex flex-col items-center cursor-pointer">
-                            <CiCirclePlus className='text-[3rem] text-green-600 font-bold' />
-                            <p>Upload Picture</p>
-                        </label>
-                    </div>
-                </form>
-            </div>
-
-            {/* Form Section for Profession */}
             <form onSubmit={handleSubmit}>
+                {/* Profile Picture */}
+                <div className='w-[340px] h-[90px] rounded-[10px] border-[2px] border-black m-2'>
+                    <div className='flex items-center gap-10 justify-around'>
+                        <div className='mt-5'>
+                            <label htmlFor="Profile">Profile Picture</label>
+                            <p>(Required*)</p>
+                        </div>
+                        <div className='w-[50%] h-[75px] flex flex-col items-center border-[2px] border-dashed border-black mt-1 rounded-[10px]'>
+                            <input
+                                type="file"
+                                id="fileUpload"
+                                className="hidden"
+                                accept="image/*"
+                                onChange={(e) => handleImageUpload(e, "uploadImg")}
+                            />
+                            <label htmlFor="fileUpload" className="flex flex-col items-center cursor-pointer">
+                                <CiCirclePlus className='text-[3rem] text-green-600 font-bold' />
+                                <p>Upload Picture</p>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Profession */}
                 <input
                     type="text"
                     name="profession"
-                    value={profession}
-                    onChange={(e) => setProfession(e.target.value)}
+                    value={formData.profession}
+                    onChange={handleInputChange}
                     placeholder="Profession (Required*)"
                     className="text-black placeholder-gray-900 w-[340px] mt-5 ml-2 mr-2 border-[2px] border-gray-500 outline-none p-3 rounded-[10px]"
                 />
 
+                {/* Experience */}
                 <select
-                    className='w-[340px] mt-5 ml-2 mr-2 mb-6 border-[2px] border-gray-500 outline-none p-3 rounded-[10px] z-20'
-                    value={experience}
-                    onChange={(e) => setExperience(e.target.value)}
+                    name="experience"
+                    value={formData.experience}
+                    onChange={handleInputChange}
+                    className='w-[340px] mt-5 ml-2 mr-2 mb-6 border-[2px] border-gray-500 outline-none p-3 rounded-[10px]'
                 >
                     <option value="" className='text-gray-500'>
                         Experience (Required*)
@@ -92,15 +108,13 @@ const Form = () => {
                             <p>(Required*)</p>
                         </div>
                         <div className='w-[50%] h-[75px] flex flex-col items-center border-[2px] border-dashed border-black mt-1 rounded-[10px]'>
-                            {/* Hidden file input for offered services */}
                             <input
                                 type="file"
                                 id="offeredUpload"
                                 className="hidden"
                                 accept="image/*"
-                                onChange={handleOfferedImageUpload} // Capture the uploaded offered image
+                                onChange={(e) => handleImageUpload(e, "offered")}
                             />
-                            {/* Label for file input */}
                             <label htmlFor="offeredUpload" className="flex flex-col items-center cursor-pointer">
                                 <CiCirclePlus className='text-[3rem] text-green-600 font-bold' />
                                 <p>Add Sewa</p>
@@ -109,21 +123,23 @@ const Form = () => {
                     </div>
                 </div>
 
-                {/* Skills Section */}
+                {/* Skills */}
                 <input
                     type="text"
-                    name="skill"
-                    value={skill}
-                    onChange={(e) => setSkill(e.target.value)}
+                    id="skills"
                     placeholder="Skills (Required*)"
+                    value={currentSkill}
+                    onChange={handleSkillChange}
+                    onBlur={handleSkillBlur}
                     className="text-black placeholder-gray-900 w-[340px] mt-5 ml-2 mr-2 border-[2px] border-gray-500 outline-none p-3 rounded-[10px]"
                 />
 
-                {/* Location of Service Section */}
+                {/* Location */}
                 <select
-                    className='w-[340px] mt-5 ml-2 mr-2 mb-6 border-[2px] border-gray-500 outline-none p-3 rounded-[10px] z-20'
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
+                    name="location"
+                    value={formData.location}
+                    onChange={handleInputChange}
+                    className='w-[340px] mt-5 ml-2 mr-2 mb-6 border-[2px] border-gray-500 outline-none p-3 rounded-[10px]'
                 >
                     <option value="" className='text-gray-500'>
                         Location of Service (Required*)

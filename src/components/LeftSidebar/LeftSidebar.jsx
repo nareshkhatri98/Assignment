@@ -17,7 +17,7 @@ const LeftSidebar = () => {
                 </p>
 
                 {/* form */}
-                <Form />
+                <Form  />
             </div>
         </div>
     );
